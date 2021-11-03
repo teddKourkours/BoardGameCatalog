@@ -1,9 +1,9 @@
 from mailmerge import MailMerge
-import json
 from libbgg.apiv1 import BGG
 # You can also use version 2 of the api:
 from libbgg.apiv2 import BGG as BGG2
 import qrcode
+from html import unescape
 
 conn = BGG()
 
@@ -19,12 +19,12 @@ link_template = "https://boardgamegeek.com/boardgame/{}/"
 image_template = 'C:\\\\Users\\\\teddk\\\\Desktop\\\\Other\\\\BGCatalog\\\\Images\\\\{}.png'
 game_dicts = []
 
-for game in results["items"]["item"]:
+for game in results["items"]["item"][:5]:
 
 
 
     bggid = game["objectid"]
-    print(game['name']['TEXT'])
+    print(game['name']['TEXT'], image_template.format(game['name']['TEXT']))
 
     #use search for extra stats (weight, description, etc.)
     try:
@@ -45,6 +45,9 @@ for game in results["items"]["item"]:
         elif stat["type"] == "boardgameartist":
             artist.append(stat["value"])
 
+    f = open("imagetesting.png", "rb")
+    img_data = f.read()
+    f.close()
 
 
     qr = qrcode.QRCode(
@@ -69,9 +72,10 @@ for game in results["items"]["item"]:
         'Mechanisms': ", ".join(mechanisms),
         'Designer': ", ".join(designer),
         'Artist': ", ".join(artist),
+        'Description': unescape(game_plus["description"]["TEXT"])
     }
     game_dicts.append(data)
-print(game_dicts)
+# print(game_dicts)
 
 # TODO:
 def  qr(bgid):
@@ -85,48 +89,8 @@ def  qr(bgid):
 #     'website', 'year', 'names', 'bgid'
 # ]
 
-with MailMerge('test_template.docx') as document:
+with MailMerge('test_template_online.docx') as document:
     print(document.get_merge_fields())
-
-    cust_1 = {
-        'Image': 'C:\\\\Users\\\\teddk\\\\Desktop\\\\Other\\\\BGCatalog\\\\Images\\\\Keyforge.png',
-        'Year': '1234',
-        'Name': 'kEyFoRgE'
-    }
-
-    cust_2 = {
-        'Image': 'C:\\\\Users\\\\teddk\\\\Desktop\\\\Other\\\\BGCatalog\\\\Images\\\\Cryptid.png',
-        'Year': '4321',
-        'Name': 'CrYpTiD'
-    }
 
     document.merge_templates(game_dicts, 'page_break')
     document.write('test-output-2.docx')
-
-# replacements = {
-#     "\"^p": "\"",
-#     "^p\"": "\"",
-#     "1234": "nibba"
-#     }
-#
-# def paragraph_replace_text(paragraph, key, replacement):
-#     """Replace first occurence of `key` in `paragraph` with `replacement`.
-#
-#     Where a newline ("\n") appears in the replacement text, insert a new
-#     paragraph such that the newline is interpreted as a paragraph break.
-#     """
-#     new_text = paragraph.text.replace(key, replacement)
-#     lines = new_text.split("\n")
-#     for line in lines[:-1]:
-#         paragraph.insert_paragraph_before(text=line)
-#     paragraph.text = lines[-1]
-#
-# doc = Doc('test-output-2.docx')
-#
-# for key, replacement in replacements.items():
-#     for p in list(doc.paragraphs):
-#         if key in p.text:
-#             paragraph_replace_text(p, key, replacement)
-#
-# # --- save changed document ---
-# doc.save('./replace-test-1.docx')

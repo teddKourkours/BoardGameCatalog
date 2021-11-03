@@ -21,6 +21,8 @@ game_dicts = []
 
 for game in results["items"]["item"]:
 
+
+
     bggid = game["objectid"]
     print(game['name']['TEXT'])
 
@@ -30,6 +32,19 @@ for game in results["items"]["item"]:
     except KeyError:
         continue
     # print(json.dumps(game_plus, indent=4, sort_keys=True))
+
+    category, mechanisms, designer, artist = [], [], [], []
+
+    for stat in game_plus["link"]:
+        if stat["type"] == "boardgamecategory":
+            category.append(stat["value"])
+        elif stat["type"] == "boardgamemechanic":
+            mechanisms.append(stat["value"])
+        elif stat["type"] == "boardgamedesigner":
+            designer.append(stat["value"])
+        elif stat["type"] == "boardgameartist":
+            artist.append(stat["value"])
+
 
 
     qr = qrcode.QRCode(
@@ -49,7 +64,11 @@ for game in results["items"]["item"]:
                                                    else game["stats"]["minplayers"]+"-"+game["stats"]["maxplayers"],
         'PlayTime': game["stats"]["minplaytime"] if (game["stats"]["minplaytime"] == game["stats"]["playingtime"])
                                                    else game["stats"]["minplaytime"]+"-"+game["stats"]["playingtime"],
-        'Weight': game_plus["statistics"]["ratings"]['averageweight']["value"][:4]
+        'Weight': game_plus["statistics"]["ratings"]['averageweight']["value"][:4],
+        'Category': ", ".join(category),
+        'Mechanisms': ", ".join(mechanisms),
+        'Designer': ", ".join(designer),
+        'Artist': ", ".join(artist),
     }
     game_dicts.append(data)
 print(game_dicts)

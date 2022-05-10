@@ -55,7 +55,6 @@ def get_collection_data(user):
         }
         game_dicts.append(data)
     return game_dicts
-    # print(game_dicts)
 
     # __slots__ = [
     #     'designers', 'artists', 'playingtime', 'thumbnail',
